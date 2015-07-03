@@ -68,6 +68,9 @@ public class ArtistsFragment extends Fragment {
 
     public void updateListView(ArtistsPager artistsPager) {
         if ((artistsPager.artists.total == 0) || (artistsPager == null)) {
+            if (artistAdapter != null) {
+                artistAdapter.clear();
+            }
             CharSequence text = "No artists found.";
             Toast toast = Toast.makeText(context.getActivity(), text, Toast.LENGTH_SHORT);
             toast.show();
