@@ -1,5 +1,6 @@
 package edu.nanodegree.spotify;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,9 +20,10 @@ public class TracksActivity extends AppCompatActivity {
         String artistName = intent.getStringExtra(ARTIST_NAME);
         TracksFragment tracksFragment = TracksFragment.newInstance(artistId, artistName);
 
-        if (getFragmentManager().findFragmentById(android.R.id.content) == null) {
-            getFragmentManager().beginTransaction()
-                    .add(android.R.id.content, tracksFragment).commit();
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+
+        if (fm.findFragmentById(android.R.id.content) == null) {
+            fm.beginTransaction().add(android.R.id.content, tracksFragment).commit();
         }
 
         android.support.v7.app.ActionBar ab = getSupportActionBar();

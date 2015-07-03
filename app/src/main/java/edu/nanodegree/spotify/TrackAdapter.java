@@ -2,7 +2,6 @@ package edu.nanodegree.spotify;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 import kaaes.spotify.webapi.android.models.Track;
-import kaaes.spotify.webapi.android.models.Tracks;
+
 
 public class TrackAdapter extends ArrayAdapter<Track> {
 
