@@ -12,9 +12,16 @@ import kaaes.spotify.webapi.android.models.Artist;
 
 public class ArtistAdapter extends ArrayAdapter<Artist> {
     private static final String LOG_TAG = ArtistAdapter.class.getSimpleName();
+    private List<Artist> artists;
 
     public ArtistAdapter(Context context, List<Artist> artists) {
+
         super(context, 0, artists);
+        this.artists = artists;
+    }
+
+    public List<Artist> getArtists() {
+        return this.artists;
     }
 
     @Override

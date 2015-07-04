@@ -1,17 +1,43 @@
 package edu.nanodegree.spotify;
 
+import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.List;
 
-public class ArtistsActivity extends AppCompatActivity {
+import kaaes.spotify.webapi.android.models.Artist;
+
+
+public class ArtistsActivity extends AppCompatActivity implements
+        ArtistsFragment.OnDestroyArtistsFragmentListener {
+    private String FRAGMENT_TAG = "SpotifyStreamerData";
+    private RetainedFragment dataFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getSupportFragmentManager();
+        dataFragment = (RetainedFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new RetainedFragment();
+            fm.beginTransaction().add(dataFragment, FRAGMENT_TAG).commit();
+            // TODO: get and save data from fragment
+            // dataFragment.setData( CONTENT! );
+        } else {
+            List<Artist> artists = (List<Artist>) dataFragment.getData();
+            //if you added fragment via layout xml
+            ArtistsFragment fragment = (ArtistsFragment)fm.findFragmentById(R.id.main_fragment);
+            fragment.updateListView(artists);
+        }
     }
 
     @Override
@@ -28,5 +54,10 @@ public class ArtistsActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentDestroyed(List<Artist> artists) {
+        dataFragment.setData(artists);
     }
 }

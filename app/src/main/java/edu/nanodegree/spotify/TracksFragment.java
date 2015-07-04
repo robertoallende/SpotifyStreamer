@@ -1,14 +1,11 @@
 package edu.nanodegree.spotify;
 
-
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
-
 
 import com.google.common.collect.ImmutableMap;
 

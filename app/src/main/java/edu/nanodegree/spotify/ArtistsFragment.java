@@ -1,5 +1,6 @@
 package edu.nanodegree.spotify;
 
+import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.collect.ImmutableMap;
+
+import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -65,8 +68,12 @@ public class ArtistsFragment extends Fragment {
         return rootView;
     }
 
-    public void updateListView(ArtistsPager artistsPager) {
-        if ((artistsPager.artists.total == 0) || (artistsPager == null)) {
+    public void updateArtistsPager(ArtistsPager artistsPager) {
+        updateListView(artistsPager.artists.items);
+    }
+
+    public void updateListView(List<Artist> artistsList) {
+        if ((artistsList.size() == 0) || (artistsList == null)) {
             if (artistAdapter != null) {
                 artistAdapter.clear();
             }
@@ -76,7 +83,8 @@ public class ArtistsFragment extends Fragment {
             return;
         }
 
-        artistAdapter = new ArtistAdapter(context.getActivity(), artistsPager.artists.items);
+
+        artistAdapter = new ArtistAdapter(context.getActivity(), artistsList);
         final ListView listView = (ListView) context.getActivity()
                 .findViewById(R.id.listview_artistsFound);
         listView.setAdapter(artistAdapter);
@@ -103,6 +111,10 @@ public class ArtistsFragment extends Fragment {
         IBinder binder = view.getWindowToken();
         inputManager.hideSoftInputFromWindow(binder,
                 InputMethodManager.HIDE_NOT_ALWAYS);
+
+        EditText searchArtist = (EditText) view.findViewById(R.id.editText_searchArtist);
+        searchArtist.setFocusable(false);
+
     }
 
     private void showTopTracks(String artistId, String artistName) {
@@ -137,7 +149,41 @@ public class ArtistsFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArtistsPager artistsPager) {
-            updateListView(artistsPager);
+            updateArtistsPager(artistsPager);
+        }
+    }
+
+    /*
+        Following
+        http://developer.android.com/training/basics/fragments/communicating.html
+     */
+    OnDestroyArtistsFragmentListener mCallback;
+
+    // Container Activity must implement this interface
+    public interface OnDestroyArtistsFragmentListener {
+        public void onFragmentDestroyed(List<Artist> artists);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (OnDestroyArtistsFragmentListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnDestroyListener");
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        List<Artist> artists = artistAdapter.getArtists();
+        if (artists != null) {
+            mCallback.onFragmentDestroyed(artists);
         }
     }
 }
