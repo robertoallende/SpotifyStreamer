@@ -79,8 +79,8 @@ public class ArtistsFragment extends Fragment {
             if (artistAdapter != null) {
                 artistAdapter.clear();
             }
-            CharSequence text = "No artists found.";
-            Toast toast = Toast.makeText(context.getActivity(), text, Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(
+                    context.getActivity(), R.string.no_artist_found, Toast.LENGTH_SHORT);
             toast.show();
             return;
         }
