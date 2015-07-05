@@ -73,6 +73,8 @@ public class ArtistsFragment extends Fragment {
     }
 
     public void updateListView(List<Artist> artistsList) {
+        if (artistsList == null ) return;
+
         if ((artistsList.size() == 0) || (artistsList == null)) {
             if (artistAdapter != null) {
                 artistAdapter.clear();
@@ -82,7 +84,6 @@ public class ArtistsFragment extends Fragment {
             toast.show();
             return;
         }
-
 
         artistAdapter = new ArtistAdapter(context.getActivity(), artistsList);
         final ListView listView = (ListView) context.getActivity()
@@ -94,7 +95,6 @@ public class ArtistsFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-
                 Artist artist = (Artist) listView.getItemAtPosition(position);
                 Log.v(LOG_TAG, artist.name);
                 showTopTracks(artist.id, artist.name);
@@ -111,10 +111,6 @@ public class ArtistsFragment extends Fragment {
         IBinder binder = view.getWindowToken();
         inputManager.hideSoftInputFromWindow(binder,
                 InputMethodManager.HIDE_NOT_ALWAYS);
-
-        EditText searchArtist = (EditText) view.findViewById(R.id.editText_searchArtist);
-        searchArtist.setFocusable(false);
-
     }
 
     private void showTopTracks(String artistId, String artistName) {
@@ -149,6 +145,7 @@ public class ArtistsFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArtistsPager artistsPager) {
+            if (artistsPager == null) return;
             updateArtistsPager(artistsPager);
         }
     }
@@ -181,6 +178,7 @@ public class ArtistsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (artistAdapter == null) return;
         List<Artist> artists = artistAdapter.getArtists();
         if (artists != null) {
             mCallback.onFragmentDestroyed(artists);
