@@ -6,9 +6,6 @@ import kaaes.spotify.webapi.android.models.Image;
 
 public final class Utils {
 
-    private Utils() {
-    }
-
     public static int getSizeIndex(List<Image> lista) {
         int desiredSize = 200;
         int currentDistance = 1000;

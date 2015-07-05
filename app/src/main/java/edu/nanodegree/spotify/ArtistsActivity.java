@@ -13,7 +13,7 @@ import kaaes.spotify.webapi.android.models.Artist;
 
 public class ArtistsActivity extends AppCompatActivity implements
         ArtistsFragment.OnDestroyArtistsFragmentListener {
-    private String FRAGMENT_TAG = "SpotifyStreamerData";
+    private String FRAGMENT_TAG = "SpotifyStreamerArtistData";
     private RetainedFragment dataFragment;
 
     @Override
@@ -27,14 +27,10 @@ public class ArtistsActivity extends AppCompatActivity implements
 
         // create the fragment and data the first time
         if (dataFragment == null) {
-            // add the fragment
             dataFragment = new RetainedFragment();
             fm.beginTransaction().add(dataFragment, FRAGMENT_TAG).commit();
-            // TODO: get and save data from fragment
-            // dataFragment.setData( CONTENT! );
         } else {
             List<Artist> artists = (List<Artist>) dataFragment.getData();
-            //if you added fragment via layout xml
             ArtistsFragment fragment = (ArtistsFragment)fm.findFragmentById(R.id.main_fragment);
             fragment.updateListView(artists);
         }

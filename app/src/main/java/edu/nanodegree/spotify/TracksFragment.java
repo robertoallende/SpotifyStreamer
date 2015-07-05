@@ -28,19 +28,20 @@ public class TracksFragment extends ListFragment {
     }
 
     public TracksFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setRetainInstance(true);
         context = this;
         String artistId = "";
 
-        if (getArguments() != null) {
+        if (savedInstanceState == null && getArguments() != null) {
             artistId = getArguments().getString(ARTIST_ID);
             searchTracks(artistId);
         }
+
     }
 
     public void searchTracks(String mText) {

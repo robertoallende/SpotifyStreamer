@@ -56,7 +56,7 @@ public class ArtistsFragment extends Fragment {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     String mText = v.getText().toString();
-                    Log.v(LOG_TAG, "Search Pressed: " + mText);
+                    Log.v(LOG_TAG, "Searching " + mText);
                     removePhoneKeypad();
                     searchArtist(mText);
                     return true;
