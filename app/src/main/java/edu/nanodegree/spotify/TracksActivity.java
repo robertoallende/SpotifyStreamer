@@ -23,24 +23,16 @@ public class TracksActivity extends AppCompatActivity {
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         TracksFragment tracksFragment = null;
 
-        if (savedInstanceState != null) {
-            tracksFragment = (TracksFragment) fm.findFragmentByTag(FRAGMENT_TAG);
-            fm.beginTransaction().attach(tracksFragment);
-
-        } else {
-            tracksFragment = TracksFragment.newInstance(artistId, artistName);
-            if (fm.findFragmentById(android.R.id.content) == null) {
-                fm.beginTransaction().add(
-                        android.R.id.content, tracksFragment, FRAGMENT_TAG).commit();
-            }
+        tracksFragment = TracksFragment.newInstance(artistId, artistName);
+        if (fm.findFragmentById(android.R.id.content) == null) {
+            fm.beginTransaction().add(
+                    android.R.id.content, tracksFragment, FRAGMENT_TAG).commit();
         }
 
         android.support.v7.app.ActionBar ab = getSupportActionBar();
         if (artistName != null) {
             ab.setSubtitle(artistName);
         }
-
-
     }
 
     public static Intent makeIntent(Context context, String artistId, String artistName) {
