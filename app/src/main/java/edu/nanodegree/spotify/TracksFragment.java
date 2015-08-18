@@ -1,12 +1,14 @@
 package edu.nanodegree.spotify;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
+import android.widget.ListView;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -18,8 +20,8 @@ import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
 public class TracksFragment extends ListFragment {
+    private final String LOG_TAG = TracksFragment.class.getSimpleName();
     protected static final String ARTIST_ID = "artistId";
-
     private TracksFragment context;
     private TrackAdapter trackAdapter;
 
@@ -59,6 +61,15 @@ public class TracksFragment extends ListFragment {
             trackAdapter = new TrackAdapter(context.getActivity(), tracks);
             setListAdapter(trackAdapter);
         }
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        Track track = (Track) l.getItemAtPosition(position);
+        Log.v(LOG_TAG, track.name);
+        Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name);
+        startActivity(intent);
     }
 
     public class FetchTrackListTask extends AsyncTask<String, Void, Tracks> {
