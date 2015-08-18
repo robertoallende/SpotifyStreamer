@@ -16,12 +16,14 @@ import kaaes.spotify.webapi.android.models.Track;
 public class TrackAdapter extends ArrayAdapter<Track> {
 
     private static final String LOG_TAG = TrackAdapter.class.getSimpleName();
+    private List<Track> tracks;
 
     public TrackAdapter(Context context, List<Track> tracks) {
         super(context, 0, tracks);
+        this.tracks = tracks;
     }
 
-
+    public List<Track> getTracks() { return this.tracks; }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {

@@ -1,5 +1,6 @@
 package edu.nanodegree.spotify;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -9,8 +10,11 @@ import android.view.View;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.List;
+
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
 public class TracksFragment extends ListFragment {
@@ -49,10 +53,10 @@ public class TracksFragment extends ListFragment {
         trackListTask.execute(mText);
     }
 
-    public void updateListView(Tracks tracks) {
+    public void updateListView(List<Track> tracks) {
 
         if (tracks != null) {
-            trackAdapter = new TrackAdapter(context.getActivity(), tracks.tracks);
+            trackAdapter = new TrackAdapter(context.getActivity(), tracks);
             setListAdapter(trackAdapter);
         }
     }
@@ -80,8 +84,42 @@ public class TracksFragment extends ListFragment {
 
         @Override
         protected void onPostExecute(Tracks tracks) {
-            updateListView(tracks);
+            updateListView(tracks.tracks);
         }
     }
 
+    /*
+    Following
+    http://developer.android.com/training/basics/fragments/communicating.html
+ */
+    OnDestroyTracksFragmentListener mCallback;
+
+    // Container Activity must implement this interface
+    public interface OnDestroyTracksFragmentListener {
+        public void onFragmentDestroyed(List<Track> tracks);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (OnDestroyTracksFragmentListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnDestroyListener");
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (trackAdapter == null) return;
+        List<Track> tracks = trackAdapter.getTracks();
+        if (tracks != null) {
+            mCallback.onFragmentDestroyed(tracks);
+        }
+    }
 }
