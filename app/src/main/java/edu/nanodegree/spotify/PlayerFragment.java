@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -15,11 +18,16 @@ public class PlayerFragment extends Fragment {
     public PlayerFragment() {
     }
 
-    public static PlayerFragment newInstance(String songId, String songName) {
+    public static PlayerFragment newInstance(String songId, String songName, String artistName,
+                                             long duration, String artwork, String album) {
         PlayerFragment fragment = new PlayerFragment();
         Bundle args = new Bundle();
         args.putString(PlayerActivity.SONG_NAME, songName);
         args.putString(PlayerActivity.SONG_ID, songId);
+        args.putString(PlayerActivity.ARTIST_NAME, artistName);
+        args.putLong(PlayerActivity.DURATION, duration);
+        args.putString(PlayerActivity.ARTWORK, artwork);
+        args.putString(PlayerActivity.ALBUM, album);
         fragment.setArguments(args);
         return fragment;
     }
@@ -34,9 +42,24 @@ public class PlayerFragment extends Fragment {
         if (arguments != null) {
             String songName = arguments.getString(PlayerActivity.SONG_NAME);
             String songId = arguments.getString(PlayerActivity.SONG_ID);
+            String artistName = arguments.getString(PlayerActivity.ARTIST_NAME);
+            long duration = arguments.getLong(PlayerActivity.DURATION);
+            String artwork = arguments.getString(PlayerActivity.ARTWORK);
+            String albumName = arguments.getString(PlayerActivity.ALBUM);
 
-            TextView helloWorld = (TextView) rootView.findViewById(R.id.helloWorld);
-            helloWorld.setText(songName);
+            TextView songView = (TextView) rootView.findViewById(R.id.song);
+            songView.setText(songName);
+            TextView artistView = (TextView) rootView.findViewById(R.id.artist);
+            artistView.setText(artistName);
+            TextView albumView = (TextView) rootView.findViewById(R.id.album);
+            albumView.setText(albumName);
+            ImageView artworkView = (ImageView) rootView.findViewById(R.id.artwork_icon);
+            Picasso.with(this.getActivity())
+                    .load(artwork)
+                    .fit()
+                    .centerCrop()
+                    .into(artworkView);
+            
         }
         return rootView;
     }

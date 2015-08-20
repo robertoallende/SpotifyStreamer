@@ -16,6 +16,7 @@ import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.ArtistSimple;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
@@ -51,7 +52,7 @@ public class TracksFragment extends ListFragment {
     }
 
     public void searchTracks(String mText) {
-        FetchTrackListTask trackListTask = new  FetchTrackListTask();
+        FetchTrackListTask trackListTask = new FetchTrackListTask();
         trackListTask.execute(mText);
     }
 
@@ -68,7 +69,20 @@ public class TracksFragment extends ListFragment {
         super.onListItemClick(l, v, position, id);
         Track track = (Track) l.getItemAtPosition(position);
         Log.v(LOG_TAG, track.name);
-        Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name);
+
+        String imageUrl = "";
+        if (track.album.images.size() > 0) {
+            int indice = Utils.getSizeIndex(track.album.images);
+            imageUrl = track.album.images.get(indice).url;
+        }
+
+        String artists = "";
+        for(int i=0; i< track.artists.size(); i++) {
+            artists += track.artists.get(i).name;
+        }
+
+        Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name,
+                artists, track.duration_ms, imageUrl, track.album.name);
         startActivity(intent);
     }
 
@@ -102,7 +116,7 @@ public class TracksFragment extends ListFragment {
     /*
     Following
     http://developer.android.com/training/basics/fragments/communicating.html
- */
+    */
     OnDestroyTracksFragmentListener mCallback;
 
     // Container Activity must implement this interface

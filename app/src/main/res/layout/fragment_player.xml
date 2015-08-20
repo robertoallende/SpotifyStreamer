@@ -1,12 +1,45 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="edu.nanodegree.spotify.PlayerFragment">
+    tools:context="edu.nanodegree.spotify.PlayerFragment"
+    android:gravity="center"
+    android:orientation="vertical"
+    >
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/helloWorld"/>
+    <TextView
+        android:text="@string/artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/artist"
+        android:padding="@dimen/abc_switch_padding"
+        />
 
-</RelativeLayout>
+    <TextView
+        android:text="@string/album"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/album"
+        android:padding="@dimen/abc_switch_padding"
+        />
+
+    <ImageView
+        android:id="@+id/artwork_icon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/notification_template_icon_bg" />
+
+    <TextView
+        android:text="@string/song"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/song"
+        android:padding="@dimen/abc_switch_padding"
+        />
+
+
+</LinearLayout>
