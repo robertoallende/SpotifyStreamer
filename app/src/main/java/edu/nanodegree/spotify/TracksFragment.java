@@ -1,6 +1,7 @@
 package edu.nanodegree.spotify;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -72,7 +73,8 @@ public class TracksFragment extends ListFragment {
 
         String imageUrl = "";
         if (track.album.images.size() > 0) {
-            int indice = Utils.getSizeIndex(track.album.images);
+            int ScreenSize = Utils.getScreenWidth(this.getActivity());
+            int indice = Utils.getSizeIndex(track.album.images, ScreenSize);
             imageUrl = track.album.images.get(indice).url;
         }
 

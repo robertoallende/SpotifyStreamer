@@ -1,7 +1,9 @@
 package edu.nanodegree.spotify;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,12 +56,13 @@ public class PlayerFragment extends Fragment {
             TextView albumView = (TextView) rootView.findViewById(R.id.album);
             albumView.setText(albumName);
             ImageView artworkView = (ImageView) rootView.findViewById(R.id.artwork_icon);
+            int screenWidth = Utils.getScreenWidth(this.getActivity());
             Picasso.with(this.getActivity())
                     .load(artwork)
-                    .fit()
-                    .centerCrop()
+                    .resize(screenWidth, screenWidth)
+                    .centerInside()
                     .into(artworkView);
-            
+
         }
         return rootView;
     }

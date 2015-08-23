@@ -1,5 +1,10 @@
 package edu.nanodegree.spotify;
 
+import android.content.Context;
+import android.graphics.Point;
+import android.view.Display;
+import android.view.WindowManager;
+
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Image;
@@ -7,17 +12,32 @@ import kaaes.spotify.webapi.android.models.Image;
 public final class Utils {
 
     public static int getSizeIndex(List<Image> lista) {
-        int desiredSize = 200;
+        return getSizeIndex(lista, 200);
+    }
+
+    public static int getSizeIndex(List<Image> lista, int desiredSize) {
         int currentDistance = 1000;
         int result = -1;
 
         for (int i=0;  lista.size() > i; i++) {
-            int distance = Math.abs(lista.get(0).width - desiredSize);
+            int distance = Math.abs(lista.get(i).width - desiredSize);
             if (distance <= currentDistance) {
                 result = i;
                 currentDistance = distance;
             }
         }
         return result;
+    }
+
+    public static int getScreenWidth(Context context) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+            return 600;
+        }
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        return width;
     }
 }
