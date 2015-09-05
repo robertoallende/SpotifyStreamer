@@ -16,7 +16,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_heightPercent="10%"
+        app:layout_heightPercent="16%"
         android:gravity="center">
 
         <TextView
@@ -45,7 +45,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_heightPercent="55%"
+        app:layout_heightPercent="54%"
         android:gravity="center">
 
         <ImageView
@@ -76,45 +76,35 @@
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_heightPercent="15%"
-        android:gravity="center">
+        app:layout_heightPercent="10%"
+        android:gravity="center"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp">
+
+        <TextView
+            android:text="@string/zero"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/zero"
+            android:textColor="@color/player_text"/>
 
         <SeekBar
-            android:layout_width="fill_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/seekBar"
-            android:layout_gravity="fill_horizontal|bottom" />
+            android:layout_weight="1"/>
 
-        <edu.nanodegree.library.PercentLinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
+        <TextView
+            tools:text="5:30"
+            android:text="5:30"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="top"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp">
-
-            <TextView
-                tools:text="@string/zero"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="start"
-                android:id="@+id/zero"
-                app:layout_widthPercent="50%"
-                android:textColor="@color/player_text"/>
-
-            <TextView
-                tools:text="5:30"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:id="@+id/song_length"
-                app:layout_widthPercent="50%"
-                android:textColor="@color/player_text"/>
-
-        </edu.nanodegree.library.PercentLinearLayout>
+            android:id="@+id/song_length"
+            android:textColor="@color/player_text"
+            />
 
     </LinearLayout>
 
@@ -125,14 +115,22 @@
         app:layout_heightPercent="12%"
         android:gravity="center">
 
-        <ImageView
+        <!--
+        TODO: Improve buttons look & feel
+        https://developer.android.com/guide/topics/appwidgets/index.html
+        https://www.androidcookbook.com/Recipe.seam?recipeId=3307
+        http://stackoverflow.com/questions/18507351/how-to-create-custom-button-in-android-using-xml-styles
+        -->
+
+        <ImageButton
             android:id="@+id/player_previous"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:src="@android:drawable/ic_media_previous"
-            app:layout_widthPercent="33%"/>
+            app:layout_widthPercent="33%"
+            />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/player_play"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -140,7 +138,7 @@
             app:layout_widthPercent="33%"
             />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/player_next"
             android:layout_width="0dp"
             android:layout_height="match_parent"
