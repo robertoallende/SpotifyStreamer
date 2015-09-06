@@ -2,13 +2,14 @@ package edu.nanodegree.spotify;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
+
+import java.util.List;
 
 public class PlayerActivity extends AppCompatActivity {
     protected static String SONG_NAME = "songName";
@@ -18,11 +19,15 @@ public class PlayerActivity extends AppCompatActivity {
     protected static String ARTWORK = "artwork";
     protected static String ALBUM = "album";
     protected static String IS_FIRST = "isFirst";
+    protected static String URL = "url";
+
     private Boolean isFirst = false;
+    private String songUrl = "";
+    private Boolean isPlaying = false;
 
     public static Intent makeIntent(Context context, String songId, String songName,
                                     String artistName, long duration, String artwork,
-                                    String albumName, Boolean isFirst) {
+                                    String albumName, String url, Boolean isFirst) {
         Intent intent = new Intent(context, PlayerActivity.class);
         intent.putExtra(SONG_NAME, songName);
         intent.putExtra(SONG_ID, songId);
@@ -31,6 +36,7 @@ public class PlayerActivity extends AppCompatActivity {
         intent.putExtra(ARTWORK, artwork);
         intent.putExtra(ALBUM, albumName);
         intent.putExtra(IS_FIRST, isFirst);
+        intent.putExtra(URL, url);
         return intent;
     }
 
@@ -48,10 +54,13 @@ public class PlayerActivity extends AppCompatActivity {
         String artwork = intent.getStringExtra(ARTWORK);
         String album = intent.getStringExtra(ALBUM);
         isFirst = intent.getBooleanExtra(IS_FIRST, false);
+        songUrl = intent.getStringExtra(URL);
 
         PlayerFragment playerFragment = PlayerFragment.newInstance(songId, songName, artistName,
                 duration, artwork, album);
         fm.beginTransaction().add(R.id.activity_player, playerFragment).commit();
+
+        playOrPause(playerFragment.getView());
     }
 
     @Override
@@ -78,8 +87,9 @@ public class PlayerActivity extends AppCompatActivity {
 
     public void playPrevious(View v) {
         if (isFirst) {
-            rewind();
+            player(PlayerService.ACTION_STOP);
         } else {
+            player(PlayerService.ACTION_STOP);
             setResult(TracksFragment.PLAY_PREVIOUS);
             finish();
         }
@@ -87,14 +97,38 @@ public class PlayerActivity extends AppCompatActivity {
 
     public void playNext(View v) {
         setResult(TracksFragment.PLAY_NEXT);
+        player(PlayerService.ACTION_STOP);
         finish();
     }
 
     public void playOrPause(View v) {
-        Log.v("-----------", "Play! Play! Play! Play! Play! Play!");
+        if (! isPlaying) {
+            isPlaying = true;
+            player(PlayerService.ACTION_PLAY);
+        } else {
+            isPlaying = false;
+            player(PlayerService.ACTION_PAUSE);
+        }
     }
 
-    public void rewind(){
+    private void player(String action) {
+        Intent intent = new Intent(this, PlayerService.class);
+        intent.putExtra(PlayerService.SONG_URL, songUrl);
+        intent.setAction(action);
+        this.startService(intent);
+
+        if (PlayerService.ACTION_PLAY == action) {
+            updateButton(true);
+        } else {
+            updateButton(false);
+        }
+    }
+
+    private void updateButton(Boolean showPlay) {
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        android.support.v4.app.Fragment fragment = fm.findFragmentById(R.id.activity_player);
+        if (fragment instanceof PlayerFragment)
+            ((PlayerFragment) fragment).changePlayButton(showPlay);
 
     }
 

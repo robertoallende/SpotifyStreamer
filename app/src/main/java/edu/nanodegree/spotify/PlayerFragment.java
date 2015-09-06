@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -64,4 +65,16 @@ public class PlayerFragment extends Fragment {
         }
         return rootView;
     }
+
+    public void changePlayButton(Boolean showPlay) {
+        View rootView = getActivity().getWindow().getDecorView().getRootView();
+        ImageButton button = (ImageButton) rootView.findViewById(R.id.player_play);
+        if (! showPlay) {
+            button.setImageResource(android.R.drawable.ic_media_play);
+        } else {
+            button.setImageResource(android.R.drawable.ic_media_pause);
+        }
+    }
+
+
 }

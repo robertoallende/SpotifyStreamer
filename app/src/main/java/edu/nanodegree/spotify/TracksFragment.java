@@ -1,7 +1,6 @@
 package edu.nanodegree.spotify;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.ArtistSimple;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
@@ -126,7 +124,7 @@ public class TracksFragment extends ListFragment {
         *        it's showing next or previous track
         */
         Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name,
-                artists, track.duration_ms, imageUrl, track.album.name, isFirst);
+                artists, track.duration_ms, imageUrl, track.album.name, track.preview_url, isFirst);
         startActivityForResult(intent, TRACK_REQUEST);
     }
 

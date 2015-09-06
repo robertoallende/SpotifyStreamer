@@ -10,6 +10,7 @@
     android:orientation="vertical"
     tools:context="edu.nanodegree.spotify.PlayerFragment"
     android:background="@color/player_background"
+    android:id="@+id/player_fragment"
     >
 
     <LinearLayout
@@ -45,7 +46,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_heightPercent="54%"
+        app:layout_heightPercent="64%"
         android:gravity="center">
 
         <ImageView
@@ -75,7 +76,8 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <!-- By scrubbable you meant opntional ?
+    LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -106,7 +108,7 @@
             android:textColor="@color/player_text"
             />
 
-    </LinearLayout>
+    </LinearLayout -->
 
     <edu.nanodegree.library.PercentLinearLayout
         android:orientation="horizontal"
@@ -135,7 +137,7 @@
             android:id="@+id/player_play"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:src="@android:drawable/ic_media_play"
+            android:src="@android:drawable/ic_media_pause"
             app:layout_widthPercent="33%"
             android:onClick="playOrPause"
             />
