@@ -1,6 +1,5 @@
 package edu.nanodegree.spotify;
 
-import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -62,7 +61,6 @@ public class PlayerFragment extends Fragment {
                     .resize(screenWidth, screenWidth)
                     .centerInside()
                     .into(artworkView);
-
         }
         return rootView;
     }

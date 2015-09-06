@@ -27,6 +27,11 @@ public class TracksFragment extends ListFragment {
     private TracksFragment context;
     private TrackAdapter trackAdapter;
 
+    static final int TRACK_REQUEST = 1;
+    static final int PLAY_PREVIOUS = 2;
+    static final int PLAY_NEXT = 3;
+    private int currentPosition = 0;
+
     public static TracksFragment newInstance(String artistId, String artistName) {
         TracksFragment fragment = new TracksFragment();
         Bundle args = new Bundle();
@@ -68,10 +73,44 @@ public class TracksFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+        currentPosition = position;
         Track track = (Track) l.getItemAtPosition(position);
         Log.v(LOG_TAG, track.name);
 
+        openPlayer(track);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == TRACK_REQUEST) {
+            int nextPosition = 0;
+            if (currentPosition < 0 || resultCode == 0) {
+                return;
+            }
+
+            ListView list = getListView();
+            int maxPosition = list.getCount() - 1;
+
+            if (resultCode == PLAY_PREVIOUS && currentPosition != 0) {
+                nextPosition = currentPosition - 1;
+            } else if (resultCode == PLAY_NEXT && currentPosition < maxPosition) {
+                nextPosition = currentPosition + 1;
+            } else if (resultCode == PLAY_NEXT && currentPosition == maxPosition) {
+                nextPosition = 0;
+            } else {
+                nextPosition = currentPosition;
+            }
+
+            Track track = (Track) list.getItemAtPosition(nextPosition);
+            currentPosition = nextPosition;
+            openPlayer(track);
+        }
+    }
+
+    private void openPlayer(Track track) {
+        Boolean isFirst = (currentPosition == 0);
         String imageUrl = "";
+
         if (track.album.images.size() > 0) {
             int ScreenSize = Utils.getScreenWidth(this.getActivity());
             int indice = Utils.getSizeIndex(track.album.images, ScreenSize);
@@ -83,10 +122,14 @@ public class TracksFragment extends ListFragment {
             artists += track.artists.get(i).name;
         }
 
+        /* TODO: Add proper transition animations for cases where
+        *        it's showing next or previous track
+        */
         Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name,
-                artists, track.duration_ms, imageUrl, track.album.name);
-        startActivity(intent);
+                artists, track.duration_ms, imageUrl, track.album.name, isFirst);
+        startActivityForResult(intent, TRACK_REQUEST);
     }
+
 
     public class FetchTrackListTask extends AsyncTask<String, Void, Tracks> {
 

@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 
 public class PlayerActivity extends AppCompatActivity {
@@ -15,10 +17,12 @@ public class PlayerActivity extends AppCompatActivity {
     protected static String DURATION = "duration";
     protected static String ARTWORK = "artwork";
     protected static String ALBUM = "album";
+    protected static String IS_FIRST = "isFirst";
+    private Boolean isFirst = false;
 
     public static Intent makeIntent(Context context, String songId, String songName,
                                     String artistName, long duration, String artwork,
-                                    String albumName) {
+                                    String albumName, Boolean isFirst) {
         Intent intent = new Intent(context, PlayerActivity.class);
         intent.putExtra(SONG_NAME, songName);
         intent.putExtra(SONG_ID, songId);
@@ -26,6 +30,7 @@ public class PlayerActivity extends AppCompatActivity {
         intent.putExtra(DURATION, duration);
         intent.putExtra(ARTWORK, artwork);
         intent.putExtra(ALBUM, albumName);
+        intent.putExtra(IS_FIRST, isFirst);
         return intent;
     }
 
@@ -42,6 +47,7 @@ public class PlayerActivity extends AppCompatActivity {
         long duration = intent.getLongExtra(DURATION, 0);
         String artwork = intent.getStringExtra(ARTWORK);
         String album = intent.getStringExtra(ALBUM);
+        isFirst = intent.getBooleanExtra(IS_FIRST, false);
 
         PlayerFragment playerFragment = PlayerFragment.newInstance(songId, songName, artistName,
                 duration, artwork, album);
@@ -69,4 +75,27 @@ public class PlayerActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public void playPrevious(View v) {
+        if (isFirst) {
+            rewind();
+        } else {
+            setResult(TracksFragment.PLAY_PREVIOUS);
+            finish();
+        }
+    }
+
+    public void playNext(View v) {
+        setResult(TracksFragment.PLAY_NEXT);
+        finish();
+    }
+
+    public void playOrPause(View v) {
+        Log.v("-----------", "Play! Play! Play! Play! Play! Play!");
+    }
+
+    public void rewind(){
+
+    }
+
 }

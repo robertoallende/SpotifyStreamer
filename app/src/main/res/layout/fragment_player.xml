@@ -128,6 +128,7 @@
             android:layout_height="match_parent"
             android:src="@android:drawable/ic_media_previous"
             app:layout_widthPercent="33%"
+            android:onClick="playPrevious"
             />
 
         <ImageButton
@@ -136,6 +137,7 @@
             android:layout_height="match_parent"
             android:src="@android:drawable/ic_media_play"
             app:layout_widthPercent="33%"
+            android:onClick="playOrPause"
             />
 
         <ImageButton
@@ -144,6 +146,8 @@
             android:layout_height="match_parent"
             android:src="@android:drawable/ic_media_next"
             app:layout_widthPercent="33%"
+            android:onClick="playNext"
+
             />
 
     </edu.nanodegree.library.PercentLinearLayout>
