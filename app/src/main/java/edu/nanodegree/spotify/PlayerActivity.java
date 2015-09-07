@@ -5,10 +5,14 @@ import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class PlayerActivity extends AppCompatActivity {
@@ -21,18 +25,18 @@ public class PlayerActivity extends AppCompatActivity {
     protected static String IS_FIRST = "isFirst";
     protected static String URL = "url";
 
+    private String songUrl;
     private Boolean isFirst = false;
-    private String songUrl = "";
-    private Boolean isPlaying = false;
+
+    protected static final String FRAGMENT_TAG = "SpotifyStreamerPlayerActivity";
 
     public static Intent makeIntent(Context context, String songId, String songName,
-                                    String artistName, long duration, String artwork,
+                                    String artistName, String artwork,
                                     String albumName, String url, Boolean isFirst) {
         Intent intent = new Intent(context, PlayerActivity.class);
         intent.putExtra(SONG_NAME, songName);
         intent.putExtra(SONG_ID, songId);
         intent.putExtra(ARTIST_NAME, artistName);
-        intent.putExtra(DURATION, duration);
         intent.putExtra(ARTWORK, artwork);
         intent.putExtra(ALBUM, albumName);
         intent.putExtra(IS_FIRST, isFirst);
@@ -42,6 +46,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        boolean runtimeChange = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
@@ -57,39 +62,15 @@ public class PlayerActivity extends AppCompatActivity {
         songUrl = intent.getStringExtra(URL);
 
         PlayerFragment playerFragment = PlayerFragment.newInstance(songId, songName, artistName,
-                duration, artwork, album);
-        fm.beginTransaction().add(R.id.activity_player, playerFragment).commit();
-
-        playOrPause(playerFragment.getView());
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.player, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+                artwork, album, songUrl);
+        fm.beginTransaction().add(R.id.activity_player, playerFragment, FRAGMENT_TAG).commit();
     }
 
     public void playPrevious(View v) {
         if (isFirst) {
-            player(PlayerService.ACTION_STOP);
+            // player(PlayerService.ACTION_STOP);
         } else {
-            player(PlayerService.ACTION_STOP);
+            // player(PlayerService.ACTION_STOP);
             setResult(TracksFragment.PLAY_PREVIOUS);
             finish();
         }
@@ -97,39 +78,25 @@ public class PlayerActivity extends AppCompatActivity {
 
     public void playNext(View v) {
         setResult(TracksFragment.PLAY_NEXT);
-        player(PlayerService.ACTION_STOP);
+        // player(PlayerService.ACTION_STOP);
         finish();
     }
 
-    public void playOrPause(View v) {
-        if (! isPlaying) {
-            isPlaying = true;
-            player(PlayerService.ACTION_PLAY);
-        } else {
-            isPlaying = false;
-            player(PlayerService.ACTION_PAUSE);
-        }
-    }
-
-    private void player(String action) {
-        Intent intent = new Intent(this, PlayerService.class);
-        intent.putExtra(PlayerService.SONG_URL, songUrl);
-        intent.setAction(action);
-        this.startService(intent);
-
-        if (PlayerService.ACTION_PLAY == action) {
-            updateButton(true);
-        } else {
-            updateButton(false);
-        }
-    }
-
-    private void updateButton(Boolean showPlay) {
+    public void play(View v) {
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-        android.support.v4.app.Fragment fragment = fm.findFragmentById(R.id.activity_player);
-        if (fragment instanceof PlayerFragment)
-            ((PlayerFragment) fragment).changePlayButton(showPlay);
+        PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+        fragment.playSong();
+    }
 
+    public void pause(View v) {
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+        fragment.stopSong();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return super.onKeyDown(keyCode, event);
     }
 
 }

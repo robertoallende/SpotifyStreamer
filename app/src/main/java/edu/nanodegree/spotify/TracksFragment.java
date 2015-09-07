@@ -124,7 +124,7 @@ public class TracksFragment extends ListFragment {
         *        it's showing next or previous track
         */
         Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name,
-                artists, track.duration_ms, imageUrl, track.album.name, track.preview_url, isFirst);
+                artists, imageUrl, track.album.name, track.preview_url, isFirst);
         startActivityForResult(intent, TRACK_REQUEST);
     }
 
