@@ -19,7 +19,7 @@ public class ArtistsActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_artists);
 
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
