@@ -1,6 +1,5 @@
 package edu.nanodegree.spotify;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,32 +14,29 @@ import kaaes.spotify.webapi.android.models.Track;
 public class TracksActivity extends AppCompatActivity implements
         TracksFragment.OnDestroyTracksFragmentListener {
     protected static final String ARTIST_NAME = "artistName";
-    protected static final String FRAGMENT_TAG = "SpotifyStreamerTracksActivity";
+    protected static final String FRAGMENT_TAG = "SpotifyStreamerTracksData";
     private RetainedFragment dataFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_tracks);
 
         Intent intent = getIntent();
         String artistId = intent.getStringExtra(TracksFragment.ARTIST_ID);
         String artistName = intent.getStringExtra(ARTIST_NAME);
 
-        TracksFragment tracksFragment = null;
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        TracksFragment tracksFragment = (TracksFragment) fm.findFragmentById(R.id.fragment_tracks);
+        dataFragment = (RetainedFragment) fm.findFragmentByTag(FRAGMENT_TAG);
 
         if (dataFragment == null) {
             dataFragment = new RetainedFragment();
             fm.beginTransaction().add(dataFragment, FRAGMENT_TAG).commit();
-
-            tracksFragment = TracksFragment.newInstance(artistId, artistName);
-            if (fm.findFragmentById(android.R.id.content) == null) {
-                fm.beginTransaction().add(
-                        android.R.id.content, tracksFragment, FRAGMENT_TAG).commit();
-            }
+            tracksFragment.searchTracks(artistId);
         } else {
             List<Track> tracks = (List<Track>) dataFragment.getData();
-            tracksFragment = (TracksFragment) fm.findFragmentById(android.R.id.content);
+            tracksFragment = (TracksFragment) fm.findFragmentById(R.id.fragment_tracks);
             tracksFragment.updateListView(tracks);
         }
 

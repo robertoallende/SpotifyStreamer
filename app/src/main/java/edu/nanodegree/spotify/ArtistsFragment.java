@@ -90,8 +90,7 @@ public class ArtistsFragment extends Fragment {
                 .findViewById(R.id.listview_artistsFound);
         listView.setAdapter(artistAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
@@ -175,9 +174,16 @@ public class ArtistsFragment extends Fragment {
         }
     }
 
+    /* Using onPause because of this:
+        Note: do not count on this method being called as a place for saving data!
+        For example, if an activity is editing data in a content provider, those edits
+        should be committed in either onPause() or onSaveInstanceState(Bundle), not here.
+        http://developer.android.com/reference/android/app/Activity.html#onDestroy%28%29
+        I reported a bug on Runtime Changes docs: http://goo.gl/TnBBv5
+    */
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onPause();
         if (artistAdapter == null) return;
         List<Artist> artists = artistAdapter.getArtists();
         if (artists != null) {

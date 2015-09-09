@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.common.collect.ImmutableMap;
@@ -19,7 +22,7 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
-public class TracksFragment extends ListFragment {
+public class TracksFragment extends Fragment {
     private final String LOG_TAG = TracksFragment.class.getSimpleName();
     protected static final String ARTIST_ID = "artistId";
     private TracksFragment context;
@@ -30,6 +33,7 @@ public class TracksFragment extends ListFragment {
     static final int PLAY_NEXT = 3;
     private int currentPosition = 0;
 
+    /*
     public static TracksFragment newInstance(String artistId, String artistName) {
         TracksFragment fragment = new TracksFragment();
         Bundle args = new Bundle();
@@ -37,37 +41,48 @@ public class TracksFragment extends ListFragment {
         fragment.setArguments(args);
         return fragment;
     }
+    */
 
     public TracksFragment() {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState)  {
+
+        View viewRoot = inflater.inflate(R.layout.fragment_tracks, container, false);
         setRetainInstance(true);
         context = this;
-        String artistId = "";
-
-        if (savedInstanceState == null && getArguments() != null) {
-            artistId = getArguments().getString(ARTIST_ID);
-            searchTracks(artistId);
-        }
-
+        return viewRoot;
     }
 
-    public void searchTracks(String mText) {
+    public void searchTracks(String artistId) {
         FetchTrackListTask trackListTask = new FetchTrackListTask();
-        trackListTask.execute(mText);
+        trackListTask.execute(artistId);
     }
 
     public void updateListView(List<Track> tracks) {
 
         if (tracks != null) {
             trackAdapter = new TrackAdapter(context.getActivity(), tracks);
-            setListAdapter(trackAdapter);
+            ListView listView = (ListView) context.getView().findViewById(R.id.track_list);
+            listView.setAdapter(trackAdapter);
+
+            listView.setOnItemClickListener(
+                    new AdapterView.OnItemClickListener() {
+
+                        @Override
+                        public void onItemClick(
+                                AdapterView<?> adapterView, View v, int position, long id) {
+                            Track track = (Track) adapterView.getItemAtPosition(position);
+                            Log.v(LOG_TAG, track.name);
+                            openPlayer(track);
+                        }
+                    });
         }
     }
 
+    /*
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
@@ -77,6 +92,7 @@ public class TracksFragment extends ListFragment {
 
         openPlayer(track);
     }
+    */
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -86,7 +102,7 @@ public class TracksFragment extends ListFragment {
                 return;
             }
 
-            ListView list = getListView();
+            ListView list = (ListView) context.getView().findViewById(R.id.track_list);
             int maxPosition = list.getCount() - 1;
 
             if (resultCode == PLAY_PREVIOUS && currentPosition != 0) {
@@ -182,8 +198,8 @@ public class TracksFragment extends ListFragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onPause();
         if (trackAdapter == null) return;
         List<Track> tracks = trackAdapter.getTracks();
         if (tracks != null) {
