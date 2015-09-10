@@ -116,8 +116,6 @@ public class TracksFragment extends Fragment {
         }
     }
 
-
-
     private void openPlayer(Track track) {
         Boolean isFirst = (currentPosition == 0);
         String imageUrl = "";
@@ -135,7 +133,9 @@ public class TracksFragment extends Fragment {
 
         /* TODO: Add proper transition animations for cases where
         *        it's showing next or previous track
-        */
+
+        sLargeLayout = getResources().getBoolean(R.bool.large_layout);
+  */
         Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name,
                 artists, imageUrl, track.album.name, track.preview_url, isFirst);
         startActivityForResult(intent, TRACK_REQUEST);

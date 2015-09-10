@@ -1,15 +1,19 @@
 package edu.nanodegree.spotify;
 
+import android.app.Dialog;
 import android.media.AudioManager;
 import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,6 +35,8 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnPreparedLi
 
     ImageButton playButton;
     ImageButton pauseButton;
+
+    private boolean isPlaying = false;
 
     public PlayerFragment() {
     }
@@ -81,7 +87,6 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnPreparedLi
                     .centerInside()
                     .into(artworkView);
 
-            playSong();
         }
 
         return rootView;
@@ -108,6 +113,9 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnPreparedLi
     public void playSong() {
         Uri songUri = Uri.parse(songUrl);
         mp = new MediaPlayer();
+        if (isPlaying) {
+            stopSong();
+        }
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
             mp.setDataSource(songUrl);
@@ -127,11 +135,13 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnPreparedLi
             mp.release();
             mp = null;
         }
+        isPlaying = false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
         mediaPlayer.start();
+        isPlaying = true;
     }
 
     @Override
@@ -145,8 +155,8 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnPreparedLi
     }
 
     @Override
-    public void onDestroy () {
+    public void onSaveInstanceState(Bundle state) {
         stopSong();
-        super.onDestroy();
+        super.onSaveInstanceState(state);
     }
 }

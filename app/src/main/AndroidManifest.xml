@@ -28,10 +28,9 @@
                 android:value="edu.nanodegree.spotify.ArtistsActivity" />
         </activity>
         <activity
+            android:theme="@style/Theme.AppCompat.Light.DialogWhenLarge"
             android:name=".PlayerActivity"
-            android:label="@string/title_activity_player" >
-        </activity>
-
+            android:label="@string/title_activity_player" />
     </application>
 
 </manifest>

@@ -2,18 +2,11 @@ package edu.nanodegree.spotify;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class PlayerActivity extends AppCompatActivity {
     protected static String SONG_NAME = "songName";
@@ -29,6 +22,7 @@ public class PlayerActivity extends AppCompatActivity {
     private Boolean isFirst = false;
 
     protected static final String FRAGMENT_TAG = "SpotifyStreamerPlayerActivity";
+    protected static final String DIALOG_TAG = FRAGMENT_TAG + "DIALOG";
 
     public static Intent makeIntent(Context context, String songId, String songName,
                                     String artistName, String artwork,
@@ -46,8 +40,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        boolean runtimeChange = false;
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_player);
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
 
@@ -64,21 +58,18 @@ public class PlayerActivity extends AppCompatActivity {
         PlayerFragment playerFragment = PlayerFragment.newInstance(songId, songName, artistName,
                 artwork, album, songUrl);
         fm.beginTransaction().add(R.id.activity_player, playerFragment, FRAGMENT_TAG).commit();
+
     }
 
     public void playPrevious(View v) {
-        if (isFirst) {
-            // player(PlayerService.ACTION_STOP);
-        } else {
-            // player(PlayerService.ACTION_STOP);
-            setResult(TracksFragment.PLAY_PREVIOUS);
-            finish();
-        }
+        pause(v);
+        setResult(TracksFragment.PLAY_PREVIOUS);
+        finish();
     }
 
     public void playNext(View v) {
+        pause(v);
         setResult(TracksFragment.PLAY_NEXT);
-        // player(PlayerService.ACTION_STOP);
         finish();
     }
 
@@ -96,7 +87,12 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+        fragment.stopSong();
         return super.onKeyDown(keyCode, event);
     }
+
+
 
 }
