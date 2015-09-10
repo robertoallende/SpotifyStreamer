@@ -27,17 +27,20 @@ public class TracksActivity extends AppCompatActivity implements
         String artistName = intent.getStringExtra(ARTIST_NAME);
 
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-        TracksFragment tracksFragment = (TracksFragment) fm.findFragmentById(R.id.fragment_tracks);
         dataFragment = (RetainedFragment) fm.findFragmentByTag(FRAGMENT_TAG);
 
         if (dataFragment == null) {
+            TracksFragment tracksFragment = new TracksFragment();
+            fm.beginTransaction().add(R.id.tracks_container, tracksFragment).commit();
+
             dataFragment = new RetainedFragment();
             fm.beginTransaction().add(dataFragment, FRAGMENT_TAG).commit();
             tracksFragment.searchTracks(artistId);
         } else {
             List<Track> tracks = (List<Track>) dataFragment.getData();
-            tracksFragment = (TracksFragment) fm.findFragmentById(R.id.fragment_tracks);
-            tracksFragment.updateListView(tracks);
+            TracksFragment tracksFragment =
+                    (TracksFragment) fm.findFragmentById(R.id.tracks_container);
+            tracksFragment.setTracks(tracks);
         }
 
         android.support.v7.app.ActionBar ab = getSupportActionBar();
@@ -72,12 +75,11 @@ public class TracksActivity extends AppCompatActivity implements
                 onBackPressed();
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onFragmentDestroyed(List<Track> tracks) {
+    public void onTracksFragmentDestroyed(List<Track> tracks) {
         dataFragment.setData(tracks);
     }
 }

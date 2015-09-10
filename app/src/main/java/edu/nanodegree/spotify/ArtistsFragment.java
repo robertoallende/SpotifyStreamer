@@ -40,6 +40,8 @@ public class ArtistsFragment extends Fragment {
     private ArtistAdapter artistAdapter;
     private View view;
 
+    private boolean mDualPane;
+
     public ArtistsFragment() {
     }
 
@@ -66,6 +68,13 @@ public class ArtistsFragment extends Fragment {
         });
         view = rootView;
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        View detailsFrame = getActivity().findViewById(R.id.tracks_container);
+        mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
     }
 
     public void updateArtistsPager(ArtistsPager artistsPager) {
@@ -113,11 +122,25 @@ public class ArtistsFragment extends Fragment {
     }
 
     private void showTopTracks(String artistId, String artistName) {
+        if (mDualPane) {
+            TracksFragment tracksFragment = (TracksFragment)
+                    getFragmentManager().findFragmentById(R.id.tracks_container);
+            tracksFragment.searchTracks(artistId);
+
+        } else {
             Intent intent = TracksActivity.makeIntent(this.getActivity(), artistId, artistName);
-        startActivity(intent);
+            startActivity(intent);
+        }
     }
 
     public void searchArtist(String mText) {
+        if (mDualPane) {
+            TracksFragment tracksFragment = (TracksFragment)
+                    getFragmentManager().findFragmentById(R.id.tracks_container);
+            if (tracksFragment != null) {
+                tracksFragment.clearTracks();
+            }
+        }
         FetchArtistsTask artistsTask = new  FetchArtistsTask();
         artistsTask.execute(mText);
     }
@@ -157,7 +180,7 @@ public class ArtistsFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface OnDestroyArtistsFragmentListener {
-        public void onFragmentDestroyed(List<Artist> artists);
+        public void onArtistsFragmentDestroyed(List<Artist> artists);
     }
 
     @Override
@@ -187,7 +210,7 @@ public class ArtistsFragment extends Fragment {
         if (artistAdapter == null) return;
         List<Artist> artists = artistAdapter.getArtists();
         if (artists != null) {
-            mCallback.onFragmentDestroyed(artists);
+            mCallback.onArtistsFragmentDestroyed(artists);
         }
     }
 }

@@ -9,12 +9,15 @@ import android.view.MenuItem;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.Track;
 
 
 public class ArtistsActivity extends AppCompatActivity implements
-        ArtistsFragment.OnDestroyArtistsFragmentListener {
+        ArtistsFragment.OnDestroyArtistsFragmentListener,
+        TracksFragment.OnDestroyTracksFragmentListener{
     private String FRAGMENT_TAG = "SpotifyStreamerArtistData";
     private RetainedFragment dataFragment;
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +34,19 @@ public class ArtistsActivity extends AppCompatActivity implements
             fm.beginTransaction().add(dataFragment, FRAGMENT_TAG).commit();
         } else {
             List<Artist> artists = (List<Artist>) dataFragment.getData();
-            ArtistsFragment fragment = (ArtistsFragment)fm.findFragmentById(R.id.main_fragment);
+            ArtistsFragment fragment = (ArtistsFragment)fm.findFragmentById(R.id.artists_fragment);
             fragment.updateListView(artists);
+        }
+
+        if (findViewById(R.id.tracks_container) != null) {
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.tracks_container, new TracksFragment())
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
         }
     }
 
@@ -53,7 +67,12 @@ public class ArtistsActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onFragmentDestroyed(List<Artist> artists) {
+    public void onArtistsFragmentDestroyed(List<Artist> artists) {
         dataFragment.setData(artists);
+    }
+
+    @Override
+    public void onTracksFragmentDestroyed(List<Track> tracks) {
+        dataFragment.setData(tracks);
     }
 }
