@@ -1,6 +1,7 @@
 package edu.nanodegree.spotify;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,23 +26,16 @@ import kaaes.spotify.webapi.android.models.Tracks;
 public class TracksFragment extends Fragment {
     private final String LOG_TAG = TracksFragment.class.getSimpleName();
     protected static final String ARTIST_ID = "artistId";
-    private TracksFragment context;
+
+    private View mViewRoot;
+    private List<Track> mTracks;
+
     private TrackAdapter trackAdapter;
 
     static final int TRACK_REQUEST = 1;
     static final int PLAY_PREVIOUS = 2;
     static final int PLAY_NEXT = 3;
     private int currentPosition = 0;
-
-    /*
-    public static TracksFragment newInstance(String artistId, String artistName) {
-        TracksFragment fragment = new TracksFragment();
-        Bundle args = new Bundle();
-        args.putString(ARTIST_ID, artistId);
-        fragment.setArguments(args);
-        return fragment;
-    }
-    */
 
     public TracksFragment() {
     }
@@ -50,10 +44,9 @@ public class TracksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)  {
 
-        View viewRoot = inflater.inflate(R.layout.fragment_tracks, container, false);
+        mViewRoot = inflater.inflate(R.layout.fragment_tracks, container, false);
         setRetainInstance(true);
-        context = this;
-        return viewRoot;
+        return mViewRoot;
     }
 
     public void searchTracks(String artistId) {
@@ -61,11 +54,25 @@ public class TracksFragment extends Fragment {
         trackListTask.execute(artistId);
     }
 
-    public void updateListView(List<Track> tracks) {
+    public void onActivityCreated(Bundle bundle) {
+        super.onActivityCreated(bundle);
+        if (mTracks != null) {
+            updateListView();
+        }
+    }
 
-        if (tracks != null) {
-            trackAdapter = new TrackAdapter(context.getActivity(), tracks);
-            ListView listView = (ListView) context.getView().findViewById(R.id.track_list);
+    public void clearTracks() {
+        if (trackAdapter != null) {
+            trackAdapter.clear();
+            trackAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public void updateListView() {
+
+        if (mTracks != null) {
+            trackAdapter = new TrackAdapter(this.getContext() , mTracks);
+            ListView listView = (ListView) mViewRoot.findViewById(R.id.track_list);
             listView.setAdapter(trackAdapter);
 
             listView.setOnItemClickListener(
@@ -82,18 +89,6 @@ public class TracksFragment extends Fragment {
         }
     }
 
-    /*
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-        currentPosition = position;
-        Track track = (Track) l.getItemAtPosition(position);
-        Log.v(LOG_TAG, track.name);
-
-        openPlayer(track);
-    }
-    */
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == TRACK_REQUEST) {
@@ -102,7 +97,7 @@ public class TracksFragment extends Fragment {
                 return;
             }
 
-            ListView list = (ListView) context.getView().findViewById(R.id.track_list);
+            ListView list = (ListView) mViewRoot.findViewById(R.id.track_list);
             int maxPosition = list.getCount() - 1;
 
             if (resultCode == PLAY_PREVIOUS && currentPosition != 0) {
@@ -138,7 +133,9 @@ public class TracksFragment extends Fragment {
 
         /* TODO: Add proper transition animations for cases where
         *        it's showing next or previous track
-        */
+
+        sLargeLayout = getResources().getBoolean(R.bool.large_layout);
+  */
         Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name,
                 artists, imageUrl, track.album.name, track.preview_url, isFirst);
         startActivityForResult(intent, TRACK_REQUEST);
@@ -168,8 +165,13 @@ public class TracksFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Tracks tracks) {
-            updateListView(tracks.tracks);
+            setTracks(tracks.tracks);
+            updateListView();
         }
+    }
+
+    public void setTracks(List<Track> tracks) {
+        this.mTracks = tracks;
     }
 
     /*
@@ -180,7 +182,7 @@ public class TracksFragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface OnDestroyTracksFragmentListener {
-        public void onFragmentDestroyed(List<Track> tracks);
+        public void onTracksFragmentDestroyed(List<Track> tracks);
     }
 
     @Override
@@ -203,7 +205,7 @@ public class TracksFragment extends Fragment {
         if (trackAdapter == null) return;
         List<Track> tracks = trackAdapter.getTracks();
         if (tracks != null) {
-            mCallback.onFragmentDestroyed(tracks);
+            mCallback.onTracksFragmentDestroyed(tracks);
         }
     }
 }

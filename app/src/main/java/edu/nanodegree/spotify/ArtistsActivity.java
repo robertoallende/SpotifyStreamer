@@ -9,30 +9,58 @@ import android.view.MenuItem;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.Track;
 
 
 public class ArtistsActivity extends AppCompatActivity implements
-        ArtistsFragment.OnDestroyArtistsFragmentListener {
-    private String FRAGMENT_TAG = "SpotifyStreamerArtistData";
-    private RetainedFragment dataFragment;
+        ArtistsFragment.OnDestroyArtistsFragmentListener,
+        TracksFragment.OnDestroyTracksFragmentListener {
+    private String ARTIST_FRAGMENT_TAG = "SpotifyStreamerArtistData";
+    private String TRACK_FRAGMENT_TAG = "SpotifyStreamerTrackData";
+    private RetainedFragment artistDataFragment;
+    private RetainedFragment trackDataFragment;
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_artists);
 
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
-        dataFragment = (RetainedFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+        artistDataFragment = (RetainedFragment) fm.findFragmentByTag(ARTIST_FRAGMENT_TAG);
+        trackDataFragment = (RetainedFragment) fm.findFragmentByTag(TRACK_FRAGMENT_TAG);
 
         // create the fragment and data the first time
-        if (dataFragment == null) {
-            dataFragment = new RetainedFragment();
-            fm.beginTransaction().add(dataFragment, FRAGMENT_TAG).commit();
+        if (artistDataFragment == null) {
+            artistDataFragment = new RetainedFragment();
+            fm.beginTransaction().add(artistDataFragment, ARTIST_FRAGMENT_TAG).commit();
+
         } else {
-            List<Artist> artists = (List<Artist>) dataFragment.getData();
-            ArtistsFragment fragment = (ArtistsFragment)fm.findFragmentById(R.id.main_fragment);
-            fragment.updateListView(artists);
+            List<Artist> artists = (List<Artist>) artistDataFragment.getData();
+            ArtistsFragment artistFragment =
+                    (ArtistsFragment)fm.findFragmentById(R.id.artists_fragment);
+            artistFragment.updateListView(artists);
+        }
+
+        if (findViewById(R.id.tracks_container) != null) {
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.tracks_container, new TracksFragment())
+                        .commit();
+                if (trackDataFragment != null) {
+                    TracksFragment tracksFragment =
+                            (TracksFragment) fm.findFragmentById(R.id.tracks_container);
+                    List<Track> tracks = (List<Track>) trackDataFragment.getData();
+                    tracksFragment.setTracks(tracks);
+                } else {
+                    trackDataFragment = new RetainedFragment();
+                    fm.beginTransaction().add(trackDataFragment, TRACK_FRAGMENT_TAG).commit();
+                }
+            }
+        } else {
+            mTwoPane = false;
         }
     }
 
@@ -53,7 +81,12 @@ public class ArtistsActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onFragmentDestroyed(List<Artist> artists) {
-        dataFragment.setData(artists);
+    public void onArtistsFragmentDestroyed(List<Artist> artists) {
+        artistDataFragment.setData(artists);
+    }
+
+    @Override
+    public void onTracksFragmentDestroyed(List<Track> tracks) {
+        trackDataFragment.setData(tracks);
     }
 }
