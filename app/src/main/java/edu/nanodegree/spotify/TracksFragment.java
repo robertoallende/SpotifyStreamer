@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -70,23 +71,29 @@ public class TracksFragment extends Fragment {
 
     public void updateListView() {
 
-        if (mTracks != null) {
-            trackAdapter = new TrackAdapter(this.getContext() , mTracks);
-            ListView listView = (ListView) mViewRoot.findViewById(R.id.track_list);
-            listView.setAdapter(trackAdapter);
-
-            listView.setOnItemClickListener(
-                    new AdapterView.OnItemClickListener() {
-
-                        @Override
-                        public void onItemClick(
-                                AdapterView<?> adapterView, View v, int position, long id) {
-                            Track track = (Track) adapterView.getItemAtPosition(position);
-                            Log.v(LOG_TAG, track.name);
-                            openPlayer(track);
-                        }
-                    });
+        if ((mTracks.size() == 0) || (mTracks == null)) {
+            Toast toast = Toast.makeText(
+                    getActivity(), R.string.no_tracks_found, Toast.LENGTH_SHORT);
+            toast.show();
+            return;
         }
+
+        trackAdapter = new TrackAdapter(this.getContext() , mTracks);
+        ListView listView = (ListView) mViewRoot.findViewById(R.id.track_list);
+        listView.setAdapter(trackAdapter);
+
+        listView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+
+                    @Override
+                    public void onItemClick(
+                            AdapterView<?> adapterView, View v, int position, long id) {
+                        Track track = (Track) adapterView.getItemAtPosition(position);
+                        Log.v(LOG_TAG, track.name);
+                        openPlayer(track);
+                    }
+                });
+
     }
 
     @Override
