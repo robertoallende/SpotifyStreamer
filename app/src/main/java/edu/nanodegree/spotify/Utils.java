@@ -16,7 +16,7 @@ public final class Utils {
     }
 
     public static int getSizeIndex(List<Image> lista, int desiredSize) {
-        int currentDistance = 1000;
+        int currentDistance = 10000;
         int result = -1;
 
         for (int i=0;  lista.size() > i; i++) {

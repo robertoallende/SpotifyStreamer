@@ -120,10 +120,14 @@ public class TracksFragment extends Fragment {
         Boolean isFirst = (currentPosition == 0);
         String imageUrl = "";
 
-        if (track.album.images.size() > 0) {
-            int ScreenSize = Utils.getScreenWidth(this.getActivity());
-            int indice = Utils.getSizeIndex(track.album.images, ScreenSize);
-            imageUrl = track.album.images.get(indice).url;
+        try {
+            if (track.album.images.size() > 0) {
+                int ScreenSize = Utils.getScreenWidth(this.getActivity());
+                int indice = Utils.getSizeIndex(track.album.images, ScreenSize);
+                imageUrl = track.album.images.get(indice).url;
+            }
+        } catch (Exception e) {
+            imageUrl = "";
         }
 
         String artists = "";
@@ -133,9 +137,8 @@ public class TracksFragment extends Fragment {
 
         /* TODO: Add proper transition animations for cases where
         *        it's showing next or previous track
+        */
 
-        sLargeLayout = getResources().getBoolean(R.bool.large_layout);
-  */
         Intent intent = PlayerActivity.makeIntent(this.getActivity(), track.id, track.name,
                 artists, imageUrl, track.album.name, track.preview_url, isFirst);
         startActivityForResult(intent, TRACK_REQUEST);
