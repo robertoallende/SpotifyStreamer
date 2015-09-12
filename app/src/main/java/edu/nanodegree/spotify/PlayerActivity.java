@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Toast;
 
 
 public class PlayerActivity extends AppCompatActivity {
@@ -42,6 +43,14 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (!Utils.isNetworkAvailable(this)) {
+            Toast toast = Toast.makeText(
+                    this, R.string.no_connection_error, Toast.LENGTH_SHORT);
+            toast.show();
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_player);
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
 
@@ -58,6 +67,8 @@ public class PlayerActivity extends AppCompatActivity {
         PlayerFragment playerFragment = PlayerFragment.newInstance(songId, songName, artistName,
                 artwork, album, songUrl);
         fm.beginTransaction().add(R.id.activity_player, playerFragment, FRAGMENT_TAG).commit();
+
+
 
     }
 

@@ -2,6 +2,8 @@ package edu.nanodegree.spotify;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -39,5 +41,14 @@ public final class Utils {
         display.getSize(size);
         int width = size.x;
         return width;
+    }
+
+    // Following
+    // http://stackoverflow.com/questions/4238921/detect-whether-there-is-an-internet-connection-available-on-android
+    public static boolean isNetworkAvailable(Context c) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) c.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

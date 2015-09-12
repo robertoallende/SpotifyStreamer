@@ -134,6 +134,14 @@ public class ArtistsFragment extends Fragment {
     }
 
     public void searchArtist(String mText) {
+
+        if (!Utils.isNetworkAvailable(getActivity())) {
+            Toast toast = Toast.makeText(
+                    context.getActivity(), R.string.no_connection_error, Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+
         if (mDualPane) {
             TracksFragment tracksFragment = (TracksFragment)
                     getFragmentManager().findFragmentById(R.id.tracks_container);

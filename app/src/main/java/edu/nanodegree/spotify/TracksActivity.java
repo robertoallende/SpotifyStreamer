@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -21,6 +22,14 @@ public class TracksActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracks);
+
+        if (!Utils.isNetworkAvailable(this)) {
+            Toast toast = Toast.makeText(
+                    this, R.string.no_connection_error, Toast.LENGTH_SHORT);
+            toast.show();
+            finish();
+            return;
+        }
 
         Intent intent = getIntent();
         String artistId = intent.getStringExtra(TracksFragment.ARTIST_ID);
