@@ -4,9 +4,12 @@
     <string name="title_activity_tracks">Top 10 Tracks</string>
     <string name="no_artist_found">No artists found.</string>
     <string name="no_tracks_found">No tracks found.</string>
+    <string name="no_connection_error">Error: No Internet connection found.</string>
     <string name="title_activity_player">Spotify Streamer</string>
     <string name="artist">Cold Play</string>
     <string name="album">Ghost Stories</string>
     <string name="song">A Sky Full of Stars</string>
     <string name="zero">0:00</string>
+    <string name="song_duration">1:00</string>
+
 </resources>

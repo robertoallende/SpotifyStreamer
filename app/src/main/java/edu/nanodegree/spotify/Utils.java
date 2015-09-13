@@ -11,6 +11,8 @@ import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Image;
 
+import static java.lang.String.format;
+
 public final class Utils {
 
     public static int getSizeIndex(List<Image> lista) {
@@ -50,5 +52,15 @@ public final class Utils {
                 = (ConnectivityManager) c.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    public static String secToMin(int seconds) {
+        int min = seconds /60;
+        int sec = seconds % 60;
+        return String.valueOf(format("%d:%d", min, sec));
+    }
+
+    public static int minToSec(String minutes){
+        return Integer.getInteger(minutes);
     }
 }

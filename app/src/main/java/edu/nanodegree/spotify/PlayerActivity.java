@@ -67,10 +67,7 @@ public class PlayerActivity extends AppCompatActivity {
         PlayerFragment playerFragment = PlayerFragment.newInstance(songId, songName, artistName,
                 artwork, album, songUrl);
         fm.beginTransaction().add(R.id.activity_player, playerFragment, FRAGMENT_TAG).commit();
-
-
-
-    }
+   }
 
     public void playPrevious(View v) {
         pause(v);
@@ -94,14 +91,6 @@ public class PlayerActivity extends AppCompatActivity {
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
         fragment.stopSong();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-        PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
-        fragment.stopSong();
-        return super.onKeyDown(keyCode, event);
     }
 
 

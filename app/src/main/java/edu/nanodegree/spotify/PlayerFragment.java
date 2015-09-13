@@ -1,10 +1,15 @@
 package edu.nanodegree.spotify;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -16,27 +21,30 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
-/**
- * A placeholder fragment containing a simple view.
- *  Since requirements didn' say anything about Handling audio focus and services
- *  I kept the player very simple.
- */
-public class PlayerFragment extends Fragment implements MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+public class PlayerFragment extends Fragment {
 
-    private MediaPlayer mp;
+    // private MediaPlayer mp;
     String songUrl;
-
     ImageButton playButton;
     ImageButton pauseButton;
+    static final String MSG_TAG = "messenger";
 
-    private boolean isPlaying = false;
+    static TextView songDuration;
+    static TextView songZero;
+    static SeekBar seekBar;
+
+    private Handler handler;
+    public final static int SET_SEEKBAR = 1;
+    public final static int SET_DURATION = 2;
+    public final static int SET_ZERO = 3;
 
     public PlayerFragment() {
     }
@@ -86,77 +94,71 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnPreparedLi
                     .resize(screenWidth, screenWidth)
                     .centerInside()
                     .into(artworkView);
+            playSong();
 
+
+            songDuration = (TextView) rootView.findViewById(R.id.song_duration);
+            songZero = (TextView) rootView.findViewById(R.id.zero);
+            seekBar = (SeekBar) rootView.findViewById(R.id.seekBar);
         }
-
         return rootView;
     }
 
     public void shiftButton() {
-        /* I know there's a nicer way to do this, i thought
-           for a minute and i didn't came with anything simpler
-           than this.
+        /* Thanks to Udacity reviewer who suggested the following implementation:
         */
-        if (playButton.isEnabled()) {
-            playButton.setEnabled(false);
-            playButton.setVisibility(View.GONE);
-            pauseButton.setEnabled(true);
-            pauseButton.setVisibility(View.VISIBLE);
-        } else {
-            playButton.setEnabled(true);
-            playButton.setVisibility(View.VISIBLE);
-            pauseButton.setEnabled(false);
-            pauseButton.setVisibility(View.GONE);
-        }
+        boolean bool = playButton.isEnabled();
+        playButton.setEnabled(!bool);
+        pauseButton.setEnabled(bool);
+        playButton.setVisibility(bool ? View.GONE : View.VISIBLE);
+        pauseButton.setVisibility(bool ? View.VISIBLE : View.GONE);
     }
 
     public void playSong() {
-        Uri songUri = Uri.parse(songUrl);
-        mp = new MediaPlayer();
-        if (isPlaying) {
-            stopSong();
-        }
-        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        try {
-            mp.setDataSource(songUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mp.setOnPreparedListener(this);
-        mp.prepareAsync();
-        mp.setOnCompletionListener(this);
+        Activity activity = getActivity();
+        handler = new UIHandler(new WeakReference<PlayerFragment>(this));
+        final Messenger messenger = new Messenger(handler);
+
+        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_PLAY, messenger);
+        activity.startService(intent);
         shiftButton();
     }
 
     public void stopSong() {
+        Activity activity = getActivity();
+        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_STOP, null);
+        activity.startService(intent);
         shiftButton();
-        if (mp != null) {
-            mp.stop();
-            mp.release();
-            mp = null;
+    }
+
+    static class UIHandler extends Handler {
+        WeakReference<PlayerFragment> mParent;
+
+        public UIHandler(WeakReference<PlayerFragment> parent) {
+            mParent = parent;
         }
-        isPlaying = false;
-    }
 
-    @Override
-    public void onPrepared(MediaPlayer mediaPlayer) {
-        mediaPlayer.start();
-        isPlaying = true;
-    }
+        @Override
+        public void handleMessage(Message msg) {
+            PlayerFragment parent = mParent.get();
+            if (null != parent) {
+                int valor = (Integer) msg.obj;
+                switch (msg.what) {
+                    case SET_SEEKBAR: {
+                        if (seekBar != null) seekBar.setProgress(valor);
+                        break;
+                    }
+                    case SET_DURATION: {
+                        if (songDuration != null) songDuration.setText(Utils.secToMin(valor));
+                        break;
+                    }
+                    case SET_ZERO: {
+                        if (songZero != null) songZero.setText(Utils.secToMin(valor));
+                        break;
+                    }
+                }
+            }
+        }
 
-    @Override
-    public void onCompletion(MediaPlayer mediaPlayer) {
-        stopSong();
-    }
-
-    @Override
-    public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
-        return false;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle state) {
-        stopSong();
-        super.onSaveInstanceState(state);
     }
 }
