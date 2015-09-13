@@ -138,7 +138,7 @@
             android:layout_height="match_parent"
             android:src="@android:drawable/ic_media_play"
             app:layout_widthPercent="33%"
-            android:onClick="play"
+            android:onClick="playSong"
             />
 
         <ImageButton
@@ -147,7 +147,7 @@
             android:layout_height="match_parent"
             android:src="@android:drawable/ic_media_pause"
             app:layout_widthPercent="33%"
-            android:onClick="pause"
+            android:onClick="pauseSong"
             android:enabled="false"
             android:visibility="gone"
             />

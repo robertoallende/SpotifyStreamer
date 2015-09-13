@@ -30,6 +30,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private static final String SONG_URL = "songUrl";
     private static final String  PROGRESS = "progress";
     private Messenger messenger;
+    private int resumePosition = 0;
 
     private enum PlayerStates {
         IDLE, STOPPED, PAUSED, STARTED
@@ -68,14 +69,18 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 currentStatus == PlayerStates.STARTED && intent.getAction().equals(ACTION_PLAY))
             return(START_NOT_STICKY);
 
+        resumePosition = intent.getIntExtra(PROGRESS, 0);
+
         songUrl = newSong;
-        if (intent.getAction().equals(ACTION_PLAY)) {
+        if (intent.getAction().equals(ACTION_PLAY) && currentStatus != PlayerStates.PAUSED) {
             if (currentStatus == PlayerStates.STARTED) {
                 stop();
             }
             initMediaPlayer();
         } else if (intent.getAction().equals(ACTION_STOP)){
             stop();
+        } else if (intent.getAction().equals(ACTION_PAUSE)){
+            pause();
         } else if (intent.getAction().equals(ACTION_SEEK)) {
             int progress = intent.getIntExtra(PROGRESS, 0);
             seek(progress);
@@ -129,6 +134,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         if (mMediaPlayer != null) {
             mMediaPlayer.start();
             currentStatus = PlayerStates.STARTED;
+            if (resumePosition != 0) seek(resumePosition);
             initSeekBar();
         }
     }
@@ -152,6 +158,23 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public void pause() {
+        if (mMediaPlayer == null) return;
+        mMediaPlayer.pause();
+        currentStatus = PlayerStates.PAUSED;
+    }
+
+    public void resume(int progress) {
+        if (mMediaPlayer == null) return;
+        mMediaPlayer.start();
+        seek(progress);
+    }
+
+    public void seek(int progress) {
+        if (mMediaPlayer == null) return;
+        mMediaPlayer.seekTo(progress);
     }
 
     @Override
@@ -187,14 +210,14 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
             case AudioManager.AUDIOFOCUS_LOSS:
                 // Lost focus for an unbounded amount of time: stop playback and release media player
-                if (mMediaPlayer != null) {
+                if (mMediaPlayer != null || currentStatus != PlayerStates.STOPPED) {
                     if (mMediaPlayer.isPlaying()) stop();
                 }
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 // Lost focus for a short time, we just pause it.
-                if (mMediaPlayer != null) {
+                if (mMediaPlayer != null || currentStatus != PlayerStates.PAUSED) {
                     if (mMediaPlayer.isPlaying()) mMediaPlayer.pause();
                 }
                 break;
@@ -236,7 +259,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 int duration = 0;
                 int position = 0;
                 try {
-                    if (messenger == null || mMediaPlayer == null) return;
+                    if (messenger == null || mMediaPlayer == null ||
+                            currentStatus == PlayerStates.PAUSED) return;
                     else {
                         duration = mMediaPlayer.getDuration();
                         position = mMediaPlayer.getCurrentPosition();
@@ -250,7 +274,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                             e.printStackTrace();
                         }
                         sleep(490);
-                        if (messenger == null || mMediaPlayer == null) return;
+                        if (messenger == null || mMediaPlayer == null ||
+                                currentStatus == PlayerStates.PAUSED) return;
                         else position = mMediaPlayer.getCurrentPosition();
                     }
                 } catch (InterruptedException e) {
@@ -260,10 +285,5 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         };
 
         thread.start();
-    }
-
-    public void seek(int progress) {
-        if (mMediaPlayer == null) return;
-        mMediaPlayer.seekTo(progress);
     }
 }

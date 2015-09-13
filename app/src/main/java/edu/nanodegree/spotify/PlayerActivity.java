@@ -70,29 +70,33 @@ public class PlayerActivity extends AppCompatActivity {
    }
 
     public void playPrevious(View v) {
-        pause(v);
+        stopSong();
         setResult(TracksFragment.PLAY_PREVIOUS);
         finish();
     }
 
     public void playNext(View v) {
-        pause(v);
+        stopSong();
         setResult(TracksFragment.PLAY_NEXT);
         finish();
     }
 
-    public void play(View v) {
+    public void playSong(View v) {
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
         fragment.playSong();
     }
 
-    public void pause(View v) {
+    public void pauseSong(View v) {
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+        fragment.pauseSong();
+    }
+
+    public void stopSong() {
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
         fragment.stopSong();
     }
-
-
 
 }

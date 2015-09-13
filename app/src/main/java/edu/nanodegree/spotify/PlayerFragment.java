@@ -34,6 +34,8 @@ public class PlayerFragment extends Fragment {
     public final static int BAR_SET_DURATION = 2;
     public final static int BAR_SET_COMPLETED = 3;
 
+    int positionBeforePause = 0;
+
     public PlayerFragment() {
     }
 
@@ -103,7 +105,10 @@ public class PlayerFragment extends Fragment {
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    if (seekBar != null) seek(seekBar.getProgress());
+                    if (seekBar == null) return;
+                    int position = seekBar.getProgress();
+                    seek(position);
+                    if (playButton.isEnabled()) positionBeforePause = position;
                 }
             });
         }
@@ -120,8 +125,8 @@ public class PlayerFragment extends Fragment {
 
         playButton.setEnabled(! playEnabled);
         pauseButton.setEnabled( playEnabled);
-        playButton.setVisibility( playEnabled ? View.GONE : View.VISIBLE);
-        pauseButton.setVisibility( playEnabled ? View.VISIBLE : View.GONE);
+        playButton.setVisibility(playEnabled ? View.GONE : View.VISIBLE);
+        pauseButton.setVisibility(playEnabled ? View.VISIBLE : View.GONE);
     }
 
     public void playSong() {
@@ -129,14 +134,29 @@ public class PlayerFragment extends Fragment {
         handler = new UIHandler(new WeakReference<PlayerFragment>(this));
         final Messenger messenger = new Messenger(handler);
 
-        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_PLAY, messenger, 0);
+        Intent intent = PlayerService.makeIntent(activity, songUrl,
+                PlayerService.ACTION_PLAY, messenger, positionBeforePause);
         activity.startService(intent);
+        positionBeforePause = 0;
         shiftButton(true);
     }
 
     public void stopSong() {
         Activity activity = getActivity();
-        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_STOP, null, 0);
+        Intent intent = PlayerService.makeIntent(activity, songUrl,
+                PlayerService.ACTION_STOP, null, positionBeforePause);
+        activity.startService(intent);
+        activity.stopService(intent);
+        shiftButton(false);
+    }
+
+    public void pauseSong() {
+        if (seekBar != null) {
+            positionBeforePause = seekBar.getProgress();
+        }
+        Activity activity = getActivity();
+        Intent intent = PlayerService.makeIntent(activity, songUrl,
+                PlayerService.ACTION_PAUSE, null, positionBeforePause);
         activity.startService(intent);
         activity.stopService(intent);
         shiftButton(false);
@@ -144,7 +164,8 @@ public class PlayerFragment extends Fragment {
 
     public void seek(int valor) {
         Activity activity = getActivity();
-        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_SEEK, null, valor);
+        Intent intent = PlayerService.makeIntent(activity, songUrl,
+                PlayerService.ACTION_SEEK, null, valor);
         activity.startService(intent);
     }
 
@@ -155,7 +176,7 @@ public class PlayerFragment extends Fragment {
     }
 
     public void setSeekbarProgress(int valor){
-
+        if (positionBeforePause != 0) return;
         if (seekBar != null) seekBar.setProgress(valor);
     }
 
@@ -164,6 +185,7 @@ public class PlayerFragment extends Fragment {
     }
 
     public void setZero(int valor) {
+        if (positionBeforePause != 0) return;
         if (songZero != null) songZero.setText(Utils.secToMin(valor));
     }
 
