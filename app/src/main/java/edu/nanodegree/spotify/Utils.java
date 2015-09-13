@@ -7,6 +7,9 @@ import android.net.NetworkInfo;
 import android.view.Display;
 import android.view.WindowManager;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Image;
@@ -55,9 +58,10 @@ public final class Utils {
     }
 
     public static String secToMin(int seconds) {
-        int min = seconds /60;
-        int sec = seconds % 60;
-        return String.valueOf(format("%d:%d", min, sec));
+        Date date = new Date(seconds);
+        DateFormat formatter = new SimpleDateFormat("mm:ss");
+        return  formatter.format(date);
+        // return dateFormatted // format("%02d:%02d", seconds / 3600, seconds % 3600);
     }
 
     public static int minToSec(String minutes){

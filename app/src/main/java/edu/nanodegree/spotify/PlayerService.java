@@ -20,20 +20,22 @@ import android.os.RemoteException;
 import java.io.IOException;
 
 public class PlayerService extends Service implements MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnErrorListener,
         AudioManager.OnAudioFocusChangeListener  {
 
     public static final String ACTION_PLAY = "SpotifyStreamerPlayerService.PLAY";
     public static final String ACTION_PAUSE = "SpotifyStreamerPlayerService.PAUSE";
     public static final String ACTION_STOP= "SpotifyStreamerPlayerService.STOP";
+    public static final String ACTION_SEEK= "SpotifyStreamerPlayerService.SEEK";
     private static final String SONG_URL = "songUrl";
+    private static final String  PROGRESS = "progress";
     private Messenger messenger;
 
     private enum PlayerStates {
-        STOPPED, PAUSED, STARTED
+        IDLE, STOPPED, PAUSED, STARTED
     }
     private MediaPlayer mMediaPlayer;
-    private PlayerStates currentStatus = PlayerStates.STOPPED;
+    private PlayerStates currentStatus = PlayerStates.IDLE;
     String songUrl = "";
 
     public PlayerService() {
@@ -45,21 +47,26 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     public static Intent makeIntent(Context context, String songUrl, String action,
-                                    Messenger messenger) {
+                                    Messenger messenger, int progress) {
 
         Intent intent = new Intent(context, PlayerService.class);
         intent.putExtra(PlayerFragment.MSG_TAG, messenger);
         intent.putExtra(SONG_URL, songUrl);
+        intent.putExtra(PROGRESS, progress);
         intent.setAction(action);
         return intent;
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         String newSong = intent.getStringExtra(SONG_URL);
-        if (newSong.equals(songUrl)) return(START_NOT_STICKY);
 
         Messenger newMessenger = (Messenger) intent.getParcelableExtra(PlayerFragment.MSG_TAG);
         if (newMessenger != null) messenger = newMessenger ;
+        if (currentStatus != PlayerStates.IDLE && messenger != null ) { initSeekBar(); }
+
+        if (newSong.equals(songUrl) &&
+                currentStatus == PlayerStates.STARTED && intent.getAction().equals(ACTION_PLAY))
+            return(START_NOT_STICKY);
 
         songUrl = newSong;
         if (intent.getAction().equals(ACTION_PLAY)) {
@@ -69,6 +76,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             initMediaPlayer();
         } else if (intent.getAction().equals(ACTION_STOP)){
             stop();
+        } else if (intent.getAction().equals(ACTION_SEEK)) {
+            int progress = intent.getIntExtra(PROGRESS, 0);
+            seek(progress);
         }
         return(START_NOT_STICKY);
     }
@@ -84,6 +94,14 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
+
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer mp) {
+                        stop();
+                        stopSelf();
+                }
+            });
+
         }
 
         if (mMediaPlayer.isPlaying()) {
@@ -116,9 +134,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     public void stop() {
-        if (mMediaPlayer == null) {
-            return;
-        }
+        if (mMediaPlayer == null) return;
+
         if (mMediaPlayer.isPlaying()) {
             currentStatus = PlayerStates.STOPPED;
             mMediaPlayer.stop();
@@ -126,12 +143,15 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
-    }
 
-    @Override
-    public void onCompletion(MediaPlayer mediaPlayer) {
-        stop();
-        stopSelf();
+        if (messenger == null) return;
+        final Message durationMsg = Message.obtain(
+                null, PlayerFragment.BAR_SET_COMPLETED, 0);
+        try {
+            messenger.send(durationMsg); }
+        catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -140,19 +160,18 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     private void initSeekBar() {
-        if (messenger == null) {
-            return;
-        }
+        if (messenger == null) return;
         final Message durationMsg = Message.obtain(
-                null, PlayerFragment.SET_DURATION, mMediaPlayer.getDuration());
-        final Message zeroMsg = Message.obtain(
-                null, PlayerFragment.SET_DURATION, mMediaPlayer.getCurrentPosition());
+                null, PlayerFragment.BAR_SET_DURATION, mMediaPlayer.getDuration());
+        // final Message zeroMsg = Message.obtain(
+        //            null, PlayerFragment.BAR_UPDATE, mMediaPlayer.getCurrentPosition());
         try {
             messenger.send(durationMsg);
-            messenger.send(zeroMsg);
+        //    messenger.send(zeroMsg);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        updatePosition();
     }
 
     @Override
@@ -202,5 +221,49 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             pos = mMediaPlayer.getCurrentPosition();
         }
         return pos;
+    }
+
+    public void updatePosition() {
+        if (messenger == null || mMediaPlayer == null) return;
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                int duration = 0;
+                int position = 0;
+                try {
+                    if (messenger == null || mMediaPlayer == null) return;
+                    else {
+                        duration = mMediaPlayer.getDuration();
+                        position = mMediaPlayer.getCurrentPosition();
+                    }
+                    while (duration > position) {
+                        final Message durationMsg = Message.obtain(
+                                null, PlayerFragment.BAR_UPDATE, mMediaPlayer.getCurrentPosition());
+                        try {
+                            messenger.send(durationMsg); }
+                        catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        sleep(490);
+                        if (messenger == null || mMediaPlayer == null) return;
+                        else position = mMediaPlayer.getCurrentPosition();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        thread.start();
+    }
+
+    public void seek(int progress) {
+        if (mMediaPlayer == null) return;
+        mMediaPlayer.seekTo(progress);
     }
 }

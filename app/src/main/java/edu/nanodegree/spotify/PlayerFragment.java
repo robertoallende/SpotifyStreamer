@@ -1,32 +1,20 @@
 package edu.nanodegree.spotify;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.Image;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
 import com.squareup.picasso.Picasso;
-
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 public class PlayerFragment extends Fragment {
@@ -37,14 +25,14 @@ public class PlayerFragment extends Fragment {
     ImageButton pauseButton;
     static final String MSG_TAG = "messenger";
 
-    static TextView songDuration;
-    static TextView songZero;
-    static SeekBar seekBar;
+    private TextView songDuration;
+    private TextView songZero;
+    private SeekBar seekBar;
 
     private Handler handler;
-    public final static int SET_SEEKBAR = 1;
-    public final static int SET_DURATION = 2;
-    public final static int SET_ZERO = 3;
+    public final static int BAR_UPDATE = 1;
+    public final static int BAR_SET_DURATION = 2;
+    public final static int BAR_SET_COMPLETED = 3;
 
     public PlayerFragment() {
     }
@@ -96,22 +84,44 @@ public class PlayerFragment extends Fragment {
                     .into(artworkView);
             playSong();
 
-
             songDuration = (TextView) rootView.findViewById(R.id.song_duration);
             songZero = (TextView) rootView.findViewById(R.id.zero);
             seekBar = (SeekBar) rootView.findViewById(R.id.seekBar);
+
+            seekBar.setEnabled(false);
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    if (seekBar != null) seek(seekBar.getProgress());
+                }
+            });
         }
         return rootView;
     }
 
-    public void shiftButton() {
+    public void shiftButton(boolean isPlaying) {
         /* Thanks to Udacity reviewer who suggested the following implementation:
         */
-        boolean bool = playButton.isEnabled();
-        playButton.setEnabled(!bool);
-        pauseButton.setEnabled(bool);
-        playButton.setVisibility(bool ? View.GONE : View.VISIBLE);
-        pauseButton.setVisibility(bool ? View.VISIBLE : View.GONE);
+        boolean playEnabled = playButton.isEnabled();
+
+        if (isPlaying && !playEnabled)  return;
+        if (!isPlaying && playEnabled)  return;
+
+        playButton.setEnabled(! playEnabled);
+        pauseButton.setEnabled( playEnabled);
+        playButton.setVisibility( playEnabled ? View.GONE : View.VISIBLE);
+        pauseButton.setVisibility( playEnabled ? View.VISIBLE : View.GONE);
     }
 
     public void playSong() {
@@ -119,16 +129,42 @@ public class PlayerFragment extends Fragment {
         handler = new UIHandler(new WeakReference<PlayerFragment>(this));
         final Messenger messenger = new Messenger(handler);
 
-        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_PLAY, messenger);
+        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_PLAY, messenger, 0);
         activity.startService(intent);
-        shiftButton();
+        shiftButton(true);
     }
 
     public void stopSong() {
         Activity activity = getActivity();
-        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_STOP, null);
+        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_STOP, null, 0);
         activity.startService(intent);
-        shiftButton();
+        activity.stopService(intent);
+        shiftButton(false);
+    }
+
+    public void seek(int valor) {
+        Activity activity = getActivity();
+        Intent intent = PlayerService.makeIntent(activity, songUrl, PlayerService.ACTION_SEEK, null, valor);
+        activity.startService(intent);
+    }
+
+    public void setSeekbarMax(int valor){
+        if (seekBar == null) return;
+        seekBar.setMax(valor);
+        seekBar.setEnabled(true);
+    }
+
+    public void setSeekbarProgress(int valor){
+
+        if (seekBar != null) seekBar.setProgress(valor);
+    }
+
+    public void setDuration(int valor) {
+        if (songDuration != null) songDuration.setText(Utils.secToMin(valor));
+    }
+
+    public void setZero(int valor) {
+        if (songZero != null) songZero.setText(Utils.secToMin(valor));
     }
 
     static class UIHandler extends Handler {
@@ -144,21 +180,24 @@ public class PlayerFragment extends Fragment {
             if (null != parent) {
                 int valor = (Integer) msg.obj;
                 switch (msg.what) {
-                    case SET_SEEKBAR: {
-                        if (seekBar != null) seekBar.setProgress(valor);
+                    case BAR_UPDATE: {
+                        parent.setSeekbarProgress(valor);
+                        parent.setZero(valor);
                         break;
                     }
-                    case SET_DURATION: {
-                        if (songDuration != null) songDuration.setText(Utils.secToMin(valor));
+                    case BAR_SET_DURATION: {
+                        parent.setDuration(valor);
+                        parent.setSeekbarMax(valor);
                         break;
                     }
-                    case SET_ZERO: {
-                        if (songZero != null) songZero.setText(Utils.secToMin(valor));
+                    case BAR_SET_COMPLETED: {
+                        parent.setSeekbarProgress(0);
+                        parent.setZero(0);
+                        parent.shiftButton(false);
                         break;
                     }
                 }
             }
         }
-
     }
 }
