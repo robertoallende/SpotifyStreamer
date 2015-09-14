@@ -7,6 +7,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +17,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 public class PlayerFragment extends Fragment {
 
-    // private MediaPlayer mp;
     String songUrl;
     ImageButton playButton;
     ImageButton pauseButton;
@@ -40,7 +41,9 @@ public class PlayerFragment extends Fragment {
     }
 
     public static PlayerFragment newInstance(String songId, String songName, String artistName,
-                                             String artwork, String album, String songUrl) {
+                                             String artwork, String album, String songUrl,
+                                             Integer position, Integer positionMax) {
+
         PlayerFragment fragment = new PlayerFragment();
         Bundle args = new Bundle();
         args.putString(PlayerActivity.SONG_NAME, songName);
@@ -49,6 +52,8 @@ public class PlayerFragment extends Fragment {
         args.putString(PlayerActivity.ARTWORK, artwork);
         args.putString(PlayerActivity.ALBUM, album);
         args.putString(PlayerActivity.URL, songUrl);
+        args.putString(PlayerActivity.POSITION, position.toString());
+        args.putString(PlayerActivity.POSITION_MAX, positionMax.toString());
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,9 +61,20 @@ public class PlayerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        boolean isPaused = false;
         Bundle arguments = getArguments();
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
+
+        positionBeforePause = Integer.valueOf(arguments.getString(PlayerActivity.POSITION));
+
+        // http://stackoverflow.com/questions/10983396/fragment-oncreateview-and-onactivitycreated-called-twice
+        if (savedInstanceState != null) {
+            boolean isRecovered = savedInstanceState.getBoolean("recovered", false);
+            if (isRecovered && positionBeforePause == 0) {
+                return rootView;
+            }
+            isPaused = savedInstanceState.getBoolean("paused", false);
+        }
 
         playButton = (ImageButton) rootView.findViewById(R.id.player_play);
         pauseButton = (ImageButton) rootView.findViewById(R.id.player_pause);
@@ -69,6 +85,7 @@ public class PlayerFragment extends Fragment {
             String artistName = arguments.getString(PlayerActivity.ARTIST_NAME);
             String artwork = arguments.getString(PlayerActivity.ARTWORK);
             String albumName = arguments.getString(PlayerActivity.ALBUM);
+            int  positionMax = Integer.valueOf(arguments.getString(PlayerActivity.POSITION_MAX));
             songUrl = arguments.getString(PlayerActivity.URL);
 
             TextView songView = (TextView) rootView.findViewById(R.id.song);
@@ -84,13 +101,20 @@ public class PlayerFragment extends Fragment {
                     .resize(screenWidth, screenWidth)
                     .centerInside()
                     .into(artworkView);
-            playSong();
+
 
             songDuration = (TextView) rootView.findViewById(R.id.song_duration);
             songZero = (TextView) rootView.findViewById(R.id.zero);
             seekBar = (SeekBar) rootView.findViewById(R.id.seekBar);
 
-            seekBar.setEnabled(false);
+            boolean algo = isPaused;
+            if (positionBeforePause > 0) {
+                getPrepared(positionMax);
+            } else {
+                playSong();
+                seekBar.setEnabled(false);
+            }
+
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 
 
@@ -115,6 +139,12 @@ public class PlayerFragment extends Fragment {
         return rootView;
     }
 
+    public void getPrepared(int positionMax){
+        seekBar.setMax(positionMax);
+        seekBar.setProgress(positionBeforePause);
+        songZero.setText(Utils.secToMin(positionBeforePause));
+    }
+
     public void shiftButton(boolean isPlaying) {
         /* Thanks to Udacity reviewer who suggested the following implementation:
         */
@@ -124,7 +154,7 @@ public class PlayerFragment extends Fragment {
         if (!isPlaying && playEnabled)  return;
 
         playButton.setEnabled(! playEnabled);
-        pauseButton.setEnabled( playEnabled);
+        pauseButton.setEnabled(playEnabled);
         playButton.setVisibility(playEnabled ? View.GONE : View.VISIBLE);
         pauseButton.setVisibility(playEnabled ? View.VISIBLE : View.GONE);
     }
@@ -189,6 +219,7 @@ public class PlayerFragment extends Fragment {
         if (songZero != null) songZero.setText(Utils.secToMin(valor));
     }
 
+
     static class UIHandler extends Handler {
         WeakReference<PlayerFragment> mParent;
 
@@ -221,5 +252,25 @@ public class PlayerFragment extends Fragment {
                 }
             }
         }
+    }
+
+    public HashMap getPosition() {
+        HashMap result = new HashMap();
+        if (playButton.isEnabled())
+            result.put(PlayerActivity.POSITION, positionBeforePause);
+            result.put(PlayerActivity.POSITION_MAX, seekBar.getMax());
+        return result;
+    }
+
+    public void setPosition(int position) {
+        positionBeforePause = position;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        outState.putBoolean("recovered", true);
+        if (playButton != null) outState.putBoolean("paused", playButton.isEnabled());
+        super.onSaveInstanceState(outState);
     }
 }

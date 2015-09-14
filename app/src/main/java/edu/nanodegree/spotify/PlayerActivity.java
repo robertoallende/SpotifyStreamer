@@ -4,9 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
+
+import java.util.HashMap;
 
 
 public class PlayerActivity extends AppCompatActivity {
@@ -18,6 +19,9 @@ public class PlayerActivity extends AppCompatActivity {
     protected static String ALBUM = "album";
     protected static String IS_FIRST = "isFirst";
     protected static String URL = "url";
+    protected static String POSITION = "position";
+    protected static String POSITION_MAX = "positionMax";
+
 
     private String songUrl;
     private Boolean isFirst = false;
@@ -64,8 +68,19 @@ public class PlayerActivity extends AppCompatActivity {
         isFirst = intent.getBooleanExtra(IS_FIRST, false);
         songUrl = intent.getStringExtra(URL);
 
+        Integer position = 0;
+        Integer position_max = 0;
+        HashMap savedConf = (HashMap) getLastCustomNonConfigurationInstance();
+        if (savedConf != null) {
+            position = (Integer) savedConf.get(POSITION);
+            position_max = (Integer) savedConf.get(POSITION_MAX);
+
+            if (position == null) position = 0;
+            if (position_max == null) position = 0;
+        }
+
         PlayerFragment playerFragment = PlayerFragment.newInstance(songId, songName, artistName,
-                artwork, album, songUrl);
+                artwork, album, songUrl, position, position_max);
         fm.beginTransaction().add(R.id.activity_player, playerFragment, FRAGMENT_TAG).commit();
    }
 
@@ -99,4 +114,12 @@ public class PlayerActivity extends AppCompatActivity {
         fragment.stopSong();
     }
 
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        HashMap result = null;
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        PlayerFragment fragment = (PlayerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+        if (fragment != null) result = fragment.getPosition();
+        return result;
+    }
 }
