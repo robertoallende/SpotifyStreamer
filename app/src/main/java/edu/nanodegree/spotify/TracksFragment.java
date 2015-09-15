@@ -1,7 +1,6 @@
 package edu.nanodegree.spotify;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -78,7 +77,7 @@ public class TracksFragment extends Fragment {
             return;
         }
 
-        trackAdapter = new TrackAdapter(this.getContext() , mTracks);
+        trackAdapter = new TrackAdapter(getActivity() , mTracks);
         ListView listView = (ListView) mViewRoot.findViewById(R.id.track_list);
         listView.setAdapter(trackAdapter);
 

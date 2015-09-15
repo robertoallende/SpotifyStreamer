@@ -112,8 +112,7 @@ public class ArtistsFragment extends Fragment {
 
     public void removePhoneKeypad() {
 
-        InputMethodManager inputManager = (InputMethodManager) view
-                .getContext()
+        InputMethodManager inputManager = (InputMethodManager) getActivity()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
 
         IBinder binder = view.getWindowToken();
